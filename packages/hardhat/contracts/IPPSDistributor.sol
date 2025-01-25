@@ -49,6 +49,7 @@ contract IPPSDistributor {
             bridgers[msg.sender] = docker; // Assign the current docker as the bridger
         }
         if (bridges.length == 4) {
+            bridgers[msg.sender] = docker;
             completeDockerCycle(); // Transition the docker when 4 bridges are added
         }
 

@@ -72,6 +72,13 @@ describe("IPPSDistributor", function () {
     expect(newDocker).to.equal(addr1.address);
   });
 
+  it("Should correctly assign bridges (owner) to participants", async function () {
+    expect(await contract.bridgers(addr1.address)).to.equal(owner.address);
+    expect(await contract.bridgers(addr2.address)).to.equal(owner.address);
+    expect(await contract.bridgers(addr3.address)).to.equal(owner.address);
+    expect(await contract.bridgers(addr4.address)).to.equal(owner.address);
+  });
+
   it("Should correctly show the balance 3", async function () {
     const contractBalance3 = await contract.getBalance();
     expect(contractBalance3).to.equal(ethers.parseEther("5"));
@@ -82,19 +89,22 @@ describe("IPPSDistributor", function () {
     await addr5.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
     await addr6.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
 
-    // const contractBalance4 = await contract.getBalance();
-    // expect(contractBalance4).to.equal(ethers.parseEther("7"));
+    const contractBalance4 = await contract.getBalance();
+    expect(contractBalance4).to.equal(ethers.parseEther("7"));
 
     await addr7.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
-
-    // const contractBalance5 = await contract.getBalance();
-    // expect(contractBalance5).to.equal(ethers.parseEther("8"));
-
     await addr8.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
   
     // Check the second bridge is now docker
     const secondDocker = await contract.docker();
     expect(secondDocker).to.equal(addr2.address);
+  });
+
+  it("Should correctly assign bridges (addrs1) to participants", async function () {
+    expect(await contract.bridgers(addr5.address)).to.equal(addr1.address);
+    expect(await contract.bridgers(addr6.address)).to.equal(addr1.address);
+    expect(await contract.bridgers(addr7.address)).to.equal(addr1.address);
+    expect(await contract.bridgers(addr8.address)).to.equal(addr1.address);
   });
 
   it("Should correctly promote the second bridge to docker 3", async function () {
@@ -109,26 +119,19 @@ describe("IPPSDistributor", function () {
     expect(thirdDocker).to.equal(addr3.address);
   });
 
-  // it("Should correctly assign bridges to participants", async function () {
-    // await addr13.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
-    // await addr14.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
+  it("Should correctly assign bridges (addrs1) to participants", async function () {
+    expect(await contract.bridgers(addr9.address)).to.equal(addr2.address);
+    expect(await contract.bridgers(addr10.address)).to.equal(addr2.address);
+    expect(await contract.bridgers(addr11.address)).to.equal(addr2.address);
+    expect(await contract.bridgers(addr12.address)).to.equal(addr2.address);
+  });
+
+  it("Should correctly assign bridges to participants", async function () {
+    await addr13.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
+    await addr14.sendTransaction({ to: contract.target, value: ethers.parseEther("1") });
   
     // Verify bridger relationships
-    // expect(await contract.bridgers(addr2.address)).to.equal(addr1.address); // addr1 is the bridger for addr2
-    // expect(await contract.bridgers(addr3.address)).to.equal(addr1.address); // addr1 is the bridger for addr3
-    // expect(await contract.bridgers(addr4.address)).to.equal(addr1.address); // addr1 is the bridger for addr4
-    // expect(await contract.bridgers(addr5.address)).to.equal(addr1.address); // addr1 is the bridger for addr5
-  
-    // expect(await contract.bridgers(addr6.address)).to.equal(addr2.address); // addr2 is the bridger for addr6
-    // expect(await contract.bridgers(addr7.address)).to.equal(addr2.address); // addr2 is the bridger for addr7
-    // expect(await contract.bridgers(addr8.address)).to.equal(addr2.address); // addr2 is the bridger for addr8
-    // expect(await contract.bridgers(addr9.address)).to.equal(addr2.address); // addr2 is the bridger for addr9
-  
-    // expect(await contract.bridgers(addr10.address)).to.equal(addr3.address); // addr3 is the bridger for addr10
-    // expect(await contract.bridgers(addr11.address)).to.equal(addr3.address); // addr3 is the bridger for addr11
-    // expect(await contract.bridgers(addr12.address)).to.equal(addr3.address); // addr3 is the bridger for addr12
-    // expect(await contract.bridgers(addr13.address)).to.equal(addr3.address); // addr3 is the bridger for addr13
-  // });
-  
-
+    expect(await contract.bridgers(addr13.address)).to.equal(addr3.address); // addr1 is the bridger for addr2
+    expect(await contract.bridgers(addr14.address)).to.equal(addr3.address); // addr1 is the bridger for addr3
+  });
 });
