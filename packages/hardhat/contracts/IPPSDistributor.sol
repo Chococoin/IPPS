@@ -19,6 +19,7 @@ contract IPPSDistributor {
 
     // Event to log deposits
     event Deposit(address indexed sender, uint256 amount);
+    event DebugBridge(address indexed bridge);
 
     // Event to log withdrawals
     event Withdraw(address indexed recipient, uint256 amount);
@@ -44,24 +45,20 @@ contract IPPSDistributor {
         participantCount++;
 
         if (docker == address(0)) {
-            docker = msg.sender; // If the docker is empty, the depositor becomes the docker
+            docker = msg.sender; // If no docker, assign the depositor as docker
         } else if (bridges.length < 4) {
-            // If there is space in the bridges, add the user directly
-            bridges.push(msg.sender);
+            bridges.push(msg.sender); // Add to bridges
             bridgers[msg.sender] = docker; // Assign the current docker as the bridger
 
-            // If the docker already has 4 bridges, transition to the next cycle
             if (bridges.length == 4) {
-                completeDockerCycle();
+                completeDockerCycle(); // Transition the docker when 4 bridges are added
             }
         } else {
-            // Add to the pub if there is no space in the bridges
-            addToPub(msg.sender);
+            addToPub(msg.sender); // Add to pub if no space in bridges
         }
 
         emit Deposit(msg.sender, msg.value);
 
-        // Attempt to distribute funds if conditions are met
         if (address(this).balance >= WITHDRAW_THRESHOLD) {
             distribute();
         }
@@ -82,11 +79,6 @@ contract IPPSDistributor {
 
         // Clear the bridges
         delete bridges;
-
-        // Promote the first participant in the pub to docker, if available
-        if (pubStart < pubEnd) {
-            promoteFromPub();
-        }
     }
 
     // Promote the next participant from the pub to the docker
