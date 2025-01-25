@@ -44,17 +44,12 @@ contract IPPSDistributor {
         hasDeposited[msg.sender] = true;
         participantCount++;
 
-        if (docker == address(0)) {
-            docker = msg.sender; // If no docker, assign the depositor as docker
-        } else if (bridges.length < 4) {
+        if (bridges.length < 4) {
             bridges.push(msg.sender); // Add to bridges
             bridgers[msg.sender] = docker; // Assign the current docker as the bridger
-
-            if (bridges.length == 4) {
-                completeDockerCycle(); // Transition the docker when 4 bridges are added
-            }
-        } else {
-            addToPub(msg.sender); // Add to pub if no space in bridges
+        }
+        if (bridges.length == 4) {
+            completeDockerCycle(); // Transition the docker when 4 bridges are added
         }
 
         emit Deposit(msg.sender, msg.value);
@@ -66,25 +61,20 @@ contract IPPSDistributor {
 
     // Complete the cycle for the current docker
     function completeDockerCycle() internal {
-        // Current docker moves to sailing
-        docker = address(0);
-
-        // First bridge becomes the new docker
-        docker = bridges[0];
-
-        // The other bridges move to the pub
+        if (pubStart < pubEnd) {
+            // If the pub is not empty, promote the next one from the pub to docker.
+            docker = removeFromPub();
+        } else if (bridges.length > 0) {
+            // If the pub is empty, promote the first bridge to docker
+            docker = bridges[0];
+        } else {
+            revert("No participants available to promote to docker");
+        }
         for (uint256 i = 1; i < bridges.length; i++) {
             addToPub(bridges[i]);
         }
-
         // Clear the bridges
         delete bridges;
-    }
-
-    // Promote the next participant from the pub to the docker
-    function promoteFromPub() internal {
-        require(pubStart < pubEnd, "Pub is empty");
-        docker = removeFromPub();
     }
 
     // Add a participant to the pub
@@ -97,7 +87,6 @@ contract IPPSDistributor {
     function removeFromPub() internal returns (address) {
         require(pubStart < pubEnd, "Pub is empty");
         address participant = pub[pubStart];
-        delete pub[pubStart];
         pubStart++;
         return participant;
     }
