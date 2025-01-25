@@ -104,8 +104,7 @@ contract IPPSDistributor {
 
         uint256 parts = 8; // Always divide into 8 parts
         uint256 amountPerPart = balance / parts;
-
-        address current = docker;
+        address current = bridgers[docker];
         uint256 generationsPaid = 0;
 
         while (current != address(0) && generationsPaid < 8) {
