@@ -5,6 +5,7 @@
 :root,
 [data-theme] {
   background: oklch(var(--b2));
+  /*--background-image: url('../Images/Background.png');*/
 }
 
 body {

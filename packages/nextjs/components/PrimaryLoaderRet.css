@@ -1,0 +1,22 @@
+.pulsing-box {
+    background-color: white; /* Colore iniziale */
+    border: 100px solid #ddd; /* Bordo leggero */
+    border-radius: 8px; /* Spigoli squadrati ma con un piccolo raggio */
+    padding: 20px; /* Spazio interno */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Leggera ombra */
+    animation: pulsing 1.5s infinite; /* Animazione di pulsing */
+  }
+  
+  /* Definizione animazione pulsing */
+  @keyframes pulsing {
+    0% {
+      background-color: white;
+    }
+    50% {
+      background-color: #f0f0f0;
+    }
+    100% {
+      background-color: white;
+    }
+  }
+  
