@@ -32,8 +32,33 @@ describe("IPPSDistributor", function () {
 
   before(async function () {
     IPPSDistributor = await ethers.getContractFactory("IPPSDistributor");
-    [owner, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10, addr11, addr12, addr13, addr14, addr15, addr16, addr17, addr18, addr19, addr20, addr21, addr22, addr23, addr24] = await ethers.getSigners();
-
+    [
+      owner,
+      addr1,
+      addr2,
+      addr3,
+      addr4,
+      addr5,
+      addr6,
+      addr7,
+      addr8,
+      addr9,
+      addr10,
+      addr11,
+      addr12,
+      addr13,
+      addr14,
+      addr15,
+      addr16,
+      addr17,
+      addr18,
+      addr19,
+      addr20,
+      addr21,
+      addr22,
+      addr23,
+      addr24,
+    ] = await ethers.getSigners();
     const signers = await ethers.getSigners();
     console.log("Number of signers available:", signers.length);
 
