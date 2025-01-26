@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
+
 contract IPPSDistributor {
     address public owner;
     uint256 public constant WITHDRAW_THRESHOLD = 8 ether; // Minimum balance required to distribute funds
@@ -14,12 +16,11 @@ contract IPPSDistributor {
     uint256 public pubStart = 0; // Index of the first participant in the pub
     uint256 public pubEnd = 0;   // Index of the next available space in the pub
     address public docker; // Current participant in the docker
-    address[] public bridges; // List of bridges assigned to the current docker
+    address[] public bridge; // List of bridges assigned to the current docker
     uint256 public participantCount; // Counter for the total number of participants
 
     // Event to log deposits
     event Deposit(address indexed sender, uint256 amount);
-    event DebugBridge(address indexed bridge);
 
     // Event to log withdrawals
     event Withdraw(address indexed recipient, uint256 amount);
@@ -29,11 +30,11 @@ contract IPPSDistributor {
         require(msg.value == 1 ether, "Owner must deposit 1 ether during deployment");
 
         owner = msg.sender; // The owner of the contract
-        docker = msg.sender; // The owner becomes the first participant in the docker
-        hasDeposited[msg.sender] = true;
+        docker = owner; // The owner becomes the first participant in the docker
+        hasDeposited[owner] = true;
         participantCount = 1;
 
-        emit Deposit(msg.sender, msg.value);
+        emit Deposit(owner, msg.value);
     }
 
     // Function to receive deposits
@@ -44,15 +45,11 @@ contract IPPSDistributor {
         hasDeposited[msg.sender] = true;
         participantCount++;
 
-        if (bridges.length < 4) {
-            bridges.push(msg.sender); // Add to bridges
-            bridgers[msg.sender] = docker; // Assign the current docker as the bridger
-        }
-        if (bridges.length == 4) {
-            bridgers[msg.sender] = docker;
+        bridge.push(msg.sender); // Add to bridges
+        bridgers[msg.sender] = docker; // Assign the current docker as the bridger
+        if (bridge.length == 4) {
             completeDockerCycle(); // Transition the docker when 4 bridges are added
         }
-
         emit Deposit(msg.sender, msg.value);
 
         if (address(this).balance >= WITHDRAW_THRESHOLD) {
@@ -65,17 +62,17 @@ contract IPPSDistributor {
         if (pubStart < pubEnd) {
             // If the pub is not empty, promote the next one from the pub to docker.
             docker = removeFromPub();
-        } else if (bridges.length > 0) {
+        } else if (bridge.length > 0) {
             // If the pub is empty, promote the first bridge to docker
-            docker = bridges[0];
+            docker = bridge[0];
         } else {
             revert("No participants available to promote to docker");
         }
-        for (uint256 i = 1; i < bridges.length; i++) {
-            addToPub(bridges[i]);
+        for (uint256 i = 1; i < bridge.length; i++) {
+            addToPub(bridge[i]);
         }
         // Clear the bridges
-        delete bridges;
+        delete bridge;
     }
 
     // Add a participant to the pub
@@ -92,11 +89,6 @@ contract IPPSDistributor {
         return participant;
     }
 
-    // Get the current size of the pub
-    function getPubSize() public view returns (uint256) {
-        return pubEnd - pubStart;
-    }
-
     // Distribute funds to participants
     function distribute() internal {
         uint256 balance = address(this).balance;
@@ -108,6 +100,8 @@ contract IPPSDistributor {
         uint256 generationsPaid = 0;
 
         while (current != address(0) && generationsPaid < 8) {
+            // Move to the previous bridger
+            current = bridgers[current];
             if (payouts[current] < MAX_PAYOUT) {
                 uint256 payment = amountPerPart;
 
@@ -121,8 +115,6 @@ contract IPPSDistributor {
                 payouts[current] += payment;
                 emit Withdraw(current, payment);
             }
-
-            current = bridgers[current]; // Move to the previous bridger
             generationsPaid++;
         }
     }

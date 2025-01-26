@@ -38,7 +38,7 @@ describe("IPPSDistributor", function () {
     console.log("Number of signers available:", signers.length);
 
     signers.forEach((signer, index) => {
-      console.log(`Signer ${index + 1}: ${signer.address}`);
+      console.log(`Signer ${index }: ${signer.address}`);
     });
 
     // Deploy contract with owner depositing 1 ether
@@ -62,7 +62,7 @@ describe("IPPSDistributor", function () {
       value: ethers.parseEther("1"),
     });
   
-    const bridges = await contract.bridges(0);
+    const bridges = await contract.bridge(0);
     expect(bridges).to.equal(addr1.address);
   });
 
@@ -174,9 +174,7 @@ describe("IPPSDistributor", function () {
     expect(await contract.bridgers(addr23.address)).to.equal(addr5.address);
     expect(await contract.bridgers(addr24.address)).to.equal(addr5.address);
   });
-
-  
-
+});
   // it("Should handle a large number of deposits and print balances", async function () {
   //   const signers = await ethers.getSigners();
   
@@ -245,4 +243,4 @@ describe("IPPSDistributor", function () {
   //   const pubSize = await contract.getPubSize();
   //   console.log(`Size of pub after ${numDeposits} deposits: ${pubSize}`);
   // });
-});
+// });
