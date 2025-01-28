@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 contract IPPSDistributor {
     address public owner;
     uint256 public constant WITHDRAW_THRESHOLD = 8 ether; // Minimum balance required to distribute funds
@@ -62,14 +60,15 @@ contract IPPSDistributor {
         if (pubStart < pubEnd) {
             // If the pub is not empty, promote the next one from the pub to docker.
             docker = removeFromPub();
-        } else if (bridge.length > 0) {
+            for (uint256 i = 0; i < bridge.length; i++) {
+                addToPub(bridge[i]);
+            }
+        } else if (pubStart + pubEnd == 0) {
             // If the pub is empty, promote the first bridge to docker
             docker = bridge[0];
-        } else {
-            revert("No participants available to promote to docker");
-        }
-        for (uint256 i = 1; i < bridge.length; i++) {
-            addToPub(bridge[i]);
+            for (uint256 i = 1; i < bridge.length; i++) {
+                addToPub(bridge[i]);
+            }
         }
         // Clear the bridges
         delete bridge;
